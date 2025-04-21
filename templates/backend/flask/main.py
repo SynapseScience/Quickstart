@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
-import requests
-import os
+import requests, os, base64
 from dotenv import load_dotenv
-import base64
 
 # retrieve the environment variables from .env
 load_dotenv()

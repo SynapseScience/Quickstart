@@ -1,26 +1,13 @@
 [package]
-name = "quickstart"
+name = "synapse-quickstart"
 version = "0.1.0"
 edition = "2021"
-authors = ["Ton Nom <ton.email@example.com>"]
-description = "A CLI tool to generate a functional Express + Vanilla JS project connected to your API."
+authors = ["Mathéo Tripnaux-Moreau <matheo@paradoxe.tech>"]
+description = "A CLI tool to quickly generate a new Synapse project"
 license = "MIT"
 
 [dependencies]
-# Pour les interactions utilisateur (questionnaire en CLI)
 inquire = "0.6"
-
-# Pour les requêtes HTTP (si tu veux appeler ton API)
-reqwest = { version = "0.11", features = ["json"] }
-
-# Pour le runtime async (nécessaire pour reqwest)
-tokio = { version = "1", features = ["full"] }
-
-# Pour la sérialisation/désérialisation JSON
+include_dir = "0.7"
 serde = { version = "1.0", features = ["derive"] }
-
-# Pour copier des dossiers entiers
 fs_extra = "1.2"
-
-# Pour lire ou écrire dans les fichiers
-# (std::fs est suffisant pour les bases, mais on peut ajouter `walkdir` plus tard si besoin)

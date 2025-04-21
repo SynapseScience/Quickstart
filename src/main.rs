@@ -1,7 +1,9 @@
 use inquire::{Text, Select};
 use std::fs;
 use std::path::Path;
-use fs_extra::dir::{copy, CopyOptions};
+use include_dir::{include_dir, Dir, File};
+
+static TEMPLATES_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 fn ask_for_credentials() -> (String, String) {
     let client_id = Text::new("Client ID:").prompt().expect("Erreur lors de la saisie du Client ID.");
@@ -9,19 +11,8 @@ fn ask_for_credentials() -> (String, String) {
     (client_id, client_secret)
 }
 
-fn list_templates(dir: &str) -> Vec<String> {
-    fs::read_dir(dir)
-        .unwrap_or_else(|_| panic!("Impossible de lire le dossier des templates '{}'", dir))
-        .filter_map(|entry| {
-            entry.ok().and_then(|e| {
-                if e.path().is_dir() {
-                    e.file_name().into_string().ok()
-                } else {
-                    None
-                }
-            })
-        })
-        .collect()
+fn list_embedded_templates(dir: &Dir) -> Vec<String> {
+    dir.dirs().map(|d| d.path().file_name().unwrap().to_string_lossy().to_string()).collect()
 }
 
 fn select_template(label: &str, templates: Vec<String>) -> String {
@@ -30,23 +21,20 @@ fn select_template(label: &str, templates: Vec<String>) -> String {
         .expect("Erreur pendant la sélection de template.")
 }
 
-fn copy_template(template: &str, dst: &str) {
-    let mut options = CopyOptions::new();
-    options.copy_inside = true;
-
-    let template_path = Path::new(template);
-    if !template_path.exists() {
-        panic!("Le template '{}' n'existe pas.", template);
+fn copy_embedded_template(template_dir: &Dir, target: &str) {
+    for entry in template_dir.entries() {
+        match entry {
+            include_dir::DirEntry::Dir(subdir) => {
+                let sub_target = format!("{}/{}", target, subdir.path().file_name().unwrap().to_string_lossy());
+                fs::create_dir_all(&sub_target).unwrap();
+                copy_embedded_template(subdir, &sub_target);
+            }
+            include_dir::DirEntry::File(file) => {
+                let path = format!("{}/{}", target, file.path().file_name().unwrap().to_string_lossy());
+                fs::write(&path, file.contents()).unwrap();
+            }
+        }
     }
-
-    let entries: Vec<_> = fs::read_dir(template_path)
-        .unwrap_or_else(|e| panic!("Erreur lors de la lecture du dossier '{}': {}", template, e))
-        .filter_map(Result::ok)
-        .map(|e| e.path())
-        .collect();
-
-        fs_extra::copy_items(&entries, dst, &options)
-            .unwrap_or_else(|e| panic!("Erreur lors de la copie du template : {}", e));
 }
 
 fn write_env(dst: &str, client_id: &str, client_secret: &str) {
@@ -64,7 +52,6 @@ fn print_instructions(dst: &str) {
 }
 
 fn main() {
-    // Choix de la destination
     let dst = Text::new("Destination du projet :")
         .prompt()
         .expect("Erreur pendant la saisie.");
@@ -74,29 +61,25 @@ fn main() {
         return;
     }
 
-    // Récupération des templates
-    let backend_templates = list_templates("templates/backend");
-    let frontend_templates = list_templates("templates/frontend");
+    let backend_dir = TEMPLATES_DIR.get_dir("backend").unwrap();
+    let frontend_dir = TEMPLATES_DIR.get_dir("frontend").unwrap();
 
-    // Sélection via menu
-    let selected_backend = select_template("Choisis un backend :", backend_templates);
-    let selected_frontend = select_template("Choisis un frontend :", frontend_templates);
+    let selected_backend = select_template("Choisis un backend :", list_embedded_templates(backend_dir));
+    let selected_frontend = select_template("Choisis un frontend :", list_embedded_templates(frontend_dir));
 
-    // Création des chemins
-    let template_server_path = format!("templates/backend/{}", selected_backend);
-    let template_client_path = format!("templates/frontend/{}", selected_frontend);
-    let target_server_path = &dst;
-    let target_client_path = format!("{}/client", dst);
+    let backend_template_dir = TEMPLATES_DIR.get_dir(&format!("backend/{}", selected_backend)).unwrap();
+    let frontend_template_dir = TEMPLATES_DIR.get_dir(&format!("frontend/{}", selected_frontend)).unwrap();    
 
-    // Création des dossiers
-    fs::create_dir_all(&target_server_path).expect("Erreur lors de la création du dossier serveur ");
-    fs::create_dir_all(&target_client_path).expect("Erreur lors de la création du dossier client ");
+    let backend_target_dir = &dst;
+    let frontend_target_dir = format!("{}/client", dst);
 
-    // Génération des fichiers
+    fs::create_dir_all(&backend_target_dir).expect("Erreur lors de la création du dossier serveur ");
+    fs::create_dir_all(&frontend_target_dir).expect("Erreur lors de la création du dossier client ");
+
     let (client_id, client_secret) = ask_for_credentials();
-    copy_template(&template_server_path, &target_server_path);
-    copy_template(&template_client_path, &target_client_path);
-    write_env(&target_server_path, &client_id, &client_secret);
+    copy_embedded_template(backend_template_dir, &backend_target_dir);
+    copy_embedded_template(frontend_template_dir, &frontend_target_dir);
+    write_env(&backend_target_dir, &client_id, &client_secret);
 
     print_instructions(&dst);
 }

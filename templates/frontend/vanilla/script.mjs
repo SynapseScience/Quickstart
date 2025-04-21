@@ -1,10 +1,11 @@
-import { Session, Button } from "./synapse-front.mjs";
+import Session from "./synapse-session.mjs";
+import Button from "./synapse-button.mjs";
 
 const $ = (selector) => document.querySelector(selector);
-let synapse = new Session("https://synapse-api.replit.app/api");
+let synapse = new Session("https://api.connectome.fr");
 let button = new Button({
   selector: "#synapse-login",
-  host: "https://synapse-api.replit.app"
+  host: "https://api.connectome.fr"
 });
 
 synapse.on("connected", (user) => {

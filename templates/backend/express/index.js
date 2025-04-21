@@ -15,16 +15,16 @@ app.use(express.json());
 const signature = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
 
 // main route for Synapse authorization
-app.get("/synapse/token", async (req, res) => {
+app.post("/synapse/token", async (req, res) => {
 
-  let url = `${SYNAPSE_API}/token?code=${req.query.code}`;
+  let url = `${SYNAPSE_API}/oauth/token?code=${req.query.code}`;
   url += `&grant_type=authorization_code`;
 
   
   let response = await fetch(url, {
     method: "POST",
     headers: {
-       Authorization: `Basic ${signature}`
+      Authorization: `Basic ${signature}`
     }
   });
 
@@ -34,7 +34,7 @@ app.get("/synapse/token", async (req, res) => {
   
 });
 
-// static files (html, css, ...) served from /public
-app.use('/', express.static('public'));
+// static files (html, css, ...) served from /client
+app.use('/', express.static('client'));
 
 app.listen(8080);

@@ -16,10 +16,10 @@ SIGNATURE = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
 app = Flask(__name__)
 
 # main route for Synapse authorization
-@app.route("/synapse/token", methods=["GET"])
+@app.route("/synapse/token", methods=["POST"])
 def synapse_token():
     
-    url = f"{SYNAPSE_API}/token?code={request.args.get('code')}"
+    url = f"{SYNAPSE_API}/oauth/token?code={request.args.get('code')}"
     response = requests.post(url, headers={
         "Authorization": f"Basic {SIGNATURE}"
     })
@@ -27,13 +27,13 @@ def synapse_token():
     # a JSON object is returned with token or error
     return jsonify(response.json())
 
-# static files (html, css, ...) served from /public
+# static files (html, css, ...) served from /client
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_static_files(path):
     
     path = path if path != "" and path is not None else "index.html"
-    static_dir = os.path.join(os.getcwd(), "public")
+    static_dir = os.path.join(os.getcwd(), "client")
 
     return send_from_directory(static_dir, path)
 

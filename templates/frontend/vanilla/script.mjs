@@ -33,7 +33,7 @@ synapse.on("logout", (user) => {
 $("#test").addEventListener("click", async () => {
 
   // retrieve authenticated user from API endpoint /me
-  const user = await synapse.me();
+  const user = await synapse.request("/me");
   $("#code-results").innerHTML = JSON.stringify(user, null, "\t");
   
 })

@@ -43,7 +43,7 @@ fn copy_embedded_template(template_dir: &Dir, target: &str) {
 
 fn write_env(dst: &str, client_id: &str, client_secret: &str) {
     let env_path = format!("{}/.env", dst);
-    let contents = format!("CLIENT_ID={}\nCLIENT_SECRET={}\n", client_id, client_secret);
+    let contents = format!("SYNAPSE_ID={}\nSYNAPSE_SECRET={}\n", client_id, client_secret);
 
     fs::write(&env_path, contents)
         .unwrap_or_else(|e| panic!("[synapse-quickstart] Impossible d’écrire dans '{}' : {}", env_path, e));

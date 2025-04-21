@@ -21,7 +21,7 @@ export default class Button {
 
     let uri = button.getAttribute('data-redirect') 
       ? button.getAttribute('data-redirect') 
-      : window.location.href;
+      : window.location.href.split("?")[0];
 
     let url = `${this.hostUrl}/oauth/login?redirect_uri=${uri}`;
 
@@ -45,14 +45,17 @@ export default class Button {
     
     button.classList.add('logged');
     button.onclick = () => {
-      window.location.href = `${window.location.origin}?profile=${user.username}`;
+      window.location.href = 
+        `${window.location.origin}/profile?username=${user.username}`;
     }
 
     button.innerHTML = `
-      <img src="${user.avatar}" onerror="this.src='https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg'">
+      <img src="${user.avatar}"
+        onerror="this.src = '${this.hostUrl}/assets/user.png'">
       <div>
         <span class="synapse-name">${user.fullname}</span></br>
-        <span class="synapse-username">@${user.username}</span> ⸱ <span class="syn" id="synapse-account">${user.account}</span>
+        <span class="synapse-username">@${user.username}</span> ⸱ <span 
+        class="syn" id="synapse-account">${user.balance}</span>
       </div>`
     
   }

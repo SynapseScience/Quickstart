@@ -125,14 +125,19 @@ export default class Session extends EventTarget {
     if (!this.token) return this.errors["guest"]();
 
     try {
-      const response = await fetch(this.apiUrl + url, {
+      let params = {
         method: method,
         headers: {
           "Authorization": `Bearer ${this.token}`,
           "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
+        }
+      }
+
+      if (body && method !== "GET" && method == "HEAD") {
+        params.body = JSON.stringify(body)
+      }
+
+      const response = await fetch(this.apiUrl + url, params);
 
       if (response.ok) {
         return await response.json();

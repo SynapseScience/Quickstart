@@ -1,0 +1,62 @@
+#synapse-login > #synapse-logo {
+    width: 30px;
+    margin-left: 10px;
+}
+  
+#synapse-login {
+    background: black;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+    height: fit-content;
+    cursor: pointer !important;
+    width: fit-content;
+}
+  
+#synapse-login.synapse-bg-white {
+    background: white;
+    color: black;
+}
+  
+#synapse-login.synapse-bg-white > #synapse-logo {
+    filter: invert(1);
+}
+  
+#synapse-login.logged {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    background: transparent;
+}
+  
+#synapse-login.logged img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: black;
+}
+  
+span.synapse-username {
+    color: lightgrey;
+}
+  
+#synapse-login.synapse-text-white.logged {
+    color: white !important;
+}
+  
+.syn::after {
+    content: "";
+    position: relative;
+    display: inline-block;
+    right: -5px;
+    transform: translate(0, -10%);
+    vertical-align: middle;
+    width: var(--syn-radius, 20px);
+    height: var(--syn-radius, 20px);
+    aspect-ratio: 1 / 1;
+    background-image: url(https://synapse-api.replit.app/assets/SYN.png);
+    z-index: 99;
+    background-size: contain;
+}

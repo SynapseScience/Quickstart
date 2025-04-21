@@ -12,7 +12,8 @@ const CLIENT_SECRET = process.env.SYNAPSE_SECRET;
 const app = express();
 app.use(express.json());
 
-const signature = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
+const SIGNATURE = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`)
+  .toString("base64");
 
 // main route for Synapse authorization
 app.post("/synapse/token", async (req, res) => {
@@ -24,7 +25,7 @@ app.post("/synapse/token", async (req, res) => {
   let response = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `Basic ${signature}`
+      Authorization: `Basic ${SIGNATURE}`
     }
   });
 

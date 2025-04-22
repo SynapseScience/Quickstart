@@ -18,6 +18,7 @@ app = Flask(__name__)
 def synapse_token():
     
     url = f"{SYNAPSE_API}/oauth/token?code={request.args.get('code')}"
+    url += "&grant_type=authorization_code"
     response = requests.post(url, headers={
         "Authorization": f"Basic {SIGNATURE}"
     })
